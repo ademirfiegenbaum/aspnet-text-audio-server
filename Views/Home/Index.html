@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de Texto e Áudio - ASP.NET</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .text-display {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            color: #333;
+            line-height: 1.6;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .text-display::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .text-display::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .text-display::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .text-display::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .audio-player {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        audio {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .controls button {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .info-box {
+            background: #ecf0f1;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #555;
+            margin-top: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Leitor de Texto e Áudio</h1>
+        <p class="subtitle">Aplicação ASP.NET com IIS</p>
+
+        <!-- Seção de Texto -->
+        <div class="section">
+            <div class="section-title">Arquivo de Texto</div>
+            <button onclick="loadText()">📂 Carregar Texto</button>
+            <div id="loadingText" class="loading">
+                <div class="spinner"></div> Carregando...
+            </div>
+            <div id="statusText" class="status"></div>
+            <div id="textContent" class="text-display"></div>
+        </div>
+
+        <!-- Seção de Áudio -->
+        <div class="section">
+            <div class="section-title">Arquivo de Áudio</div>
+            <button onclick="loadAudioInfo()">🔊 Carregar Áudio</button>
+            <div id="loadingAudio" class="loading">
+                <div class="spinner"></div> Carregando...
+            </div>
+            <div id="statusAudio" class="status"></div>
+            <div class="audio-player" id="audioPlayerContainer" style="display: none;">
+                <audio id="audioPlayer" controls>
+                    <source id="audioSource" src="" type="audio/wav">
+                    Seu navegador não suporta o elemento de áudio.
+                </audio>
+            </div>
+            <div id="audioInfo" class="info-box" style="display: none;"></div>
+        </div>
+
+        <!-- Controles Adicionais -->
+        <div class="section">
+            <div class="section-title">Controles</div>
+            <div class="controls">
+                <button onclick="speakText()">🗣️ Falar Texto</button>
+                <button onclick="clearAll()">🗑️ Limpar</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Desenvolvido com ASP.NET MVC - Executado em IIS</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // Carregar arquivo de texto
+        function loadText() {
+            const loading = document.getElementById('loadingText');
+            const status = document.getElementById('statusText');
+            const content = document.getElementById('textContent');
+
+            loading.style.display = 'block';
+            status.classList.remove('show', 'success', 'error', 'info');
+
+            fetch(`${API_BASE}/Text/GetText`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro na resposta do servidor');
+                    return response.json();
+                })
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.success) {
+                        content.textContent = data.data;
+                        showStatus('statusText', 'Texto carregado com sucesso!', 'success');
+                    } else {
+                        showStatus('statusText', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showStatus('statusText', 'Erro: ' + error.message, 'error');
+                });
+        }
+
+        // Carregar informações do áudio
+        function loadAudioInfo() {
+            const loading = document.getElementById('loadingAudio');
+            const status = document.getElementById('statusAudio');
+            const playerContainer = document.getElementById('audioPlayerContainer');
+            const audioSource = document.getElementById('audioSource');
+            const infoBox = document.getElementById('audioInfo');
+
+            loading.style.display = 'block';
+            status.classList.remove('show', 'success', 'error', 'info');
+
+            fetch(`${API_BASE}/Audio/GetAudioInfo`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro na resposta do servidor');
+                    return response.json();
+                })
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.success) {
+                        audioSource.src = `${API_BASE}/Audio/GetAudio`;
+                        playerContainer.style.display = 'block';
+                        
+                        let infoHtml = `<strong>Informações do Áudio:</strong><br>`;
+                        infoHtml += `Nome: ${data.fileName}<br>`;
+                        infoHtml += `Tamanho: ${(data.fileSize / 1024).toFixed(2)} KB<br>`;
+                        infoHtml += `Data: ${new Date(data.createdDate).toLocaleString('pt-BR')}`;
+                        infoBox.innerHTML = infoHtml;
+                        infoBox.style.display = 'block';
+                        
+                        showStatus('statusAudio', 'Áudio carregado com sucesso!', 'success');
+                    } else {
+                        showStatus('statusAudio', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showStatus('statusAudio', 'Erro: ' + error.message, 'error');
+                });
+        }
+
+        // Falar o texto usando Web Speech API
+        function speakText() {
+            const text = document.getElementById('textContent').textContent;
+            if (!text) {
+                showStatus('statusText', 'Nenhum texto para falar. Carregue um texto primeiro!', 'info');
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                // Cancelar qualquer fala em andamento
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+
+                utterance.onstart = () => {
+                    showStatus('statusText', 'Falando...', 'info');
+                };
+
+                utterance.onend = () => {
+                    showStatus('statusText', 'Fala concluída!', 'success');
+                };
+
+                utterance.onerror = (event) => {
+                    showStatus('statusText', 'Erro ao falar: ' + event.error, 'error');
+                };
+
+                speechSynthesis.speak(utterance);
+            } else {
+                showStatus('statusText', 'Seu navegador não suporta síntese de voz.', 'error');
+            }
+        }
+
+        // Limpar tudo
+        function clearAll() {
+            document.getElementById('textContent').textContent = '';
+            document.getElementById('audioPlayerContainer').style.display = 'none';
+            document.getElementById('audioInfo').style.display = 'none';
+            document.getElementById('statusText').classList.remove('show');
+            document.getElementById('statusAudio').classList.remove('show');
+            speechSynthesis.cancel();
+        }
+
+        // Mostrar status
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status show ${type}`;
+            setTimeout(() => {
+                if (type !== 'error') {
+                    element.classList.remove('show');
+                }
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

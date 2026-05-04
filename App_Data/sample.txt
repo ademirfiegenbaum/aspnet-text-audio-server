@@ -1,0 +1,18 @@
+Bem-vindo ao ASP.NET Text and Audio Server!
+
+Esta é uma aplicação desenvolvida em C# com ASP.NET que roda no servidor IIS.
+
+Recursos principais:
+✓ Leitura de arquivos de texto (.txt)
+✓ Streaming de arquivos de áudio (.wav)
+✓ Interface web responsiva
+✓ Síntese de voz integrada
+✓ Player de áudio interativo
+
+Como usar:
+1. Clique no botão "Carregar Texto" para ler o arquivo de texto
+2. Clique no botão "Carregar Áudio" para reproduzir o arquivo de áudio
+3. Use o botão "Falar Texto" para ouvir o texto através da síntese de voz
+4. Os controles de áudio permitem pausar, retroceder e avançar a reprodução
+
+Esta aplicação foi criada para demonstrar as capacidades do ASP.NET MVC com recursos web modernos.
